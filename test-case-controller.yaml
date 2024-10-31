@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-case-controller
+  namespace: chrome-node  
+spec:
+  selector:
+    app: test-case-controller
+  ports:
+    - name: event-bus-publish
+      protocol: TCP
+      port: 4442
+      targetPort: 4442
+    - name: event-bus-subscribe
+      protocol: TCP
+      port: 4443
+      targetPort: 4443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-case-controller
+  namespace: chrome-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-case-controller
+  template:
+    metadata:
+      labels:
+        app: test-case-controller
+    spec:
+      containers:
+      - name: test-case-controller
+        image: registry.ziraatbank.az/rauf-test/test-case-controller:latest
+        ports:
+          - containerPort: 4442
+          - containerPort: 4443
+        env:
+          - name: SE_EVENT_BUS_HOST
+            value: "test-case-controller"
+          - name: SE_EVENT_BUS_PUBLISH_PORT
+            value: "4442"
+          - name: SE_EVENT_BUS_SUBSCRIBE_PORT
+            value: "4443"
